@@ -1,0 +1,17 @@
+---
+description: Vectora production e2e is read-only. Never add, edit, archive, or delete data.
+alwaysApply: true
+---
+
+# Vectora e2e safety
+
+- Target production admin is `https://admin.govectora.com/`.
+- Knowledge base lives under Settings → Knowledge Base. Use it as the source of truth for scenarios.
+- NEVER add, edit, archive, or delete records on this domain (or connected portals).
+- Tests may navigate, search, open lists, and assert visibility only.
+- Opening an Add/Create form to inspect its layout is allowed; leave it via Back/Cancel and assert the record count is unchanged.
+- Do not click Save, Confirm, Archive, Delete, Restore, Generate, or bulk actions.
+- Do not submit forms and do not fill fields. Login is allowed only to obtain a session.
+- Keep the Playwright read-only request guard enabled for mutating HTTP methods, except auth and read-only `/rest/v1/rpc/` calls (Supabase serves reads over POST).
+- Generate new cases from live pages via Playwright MCP (`browser_generate_locator`, snapshots) then convert them into `@playwright/test` specs.
+- After runs, use HTML (`npm run report`) and Allure (`npm run allure:open`) reports. Optional TestDino MCP is in `.cursor/mcp.testdino.example.json`.

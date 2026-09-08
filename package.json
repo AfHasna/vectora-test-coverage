@@ -1,0 +1,25 @@
+{
+  "name": "vectora",
+  "version": "1.0.0",
+  "description": "Read-only Playwright e2e for Vectora admin, client, and driver portals",
+  "license": "ISC",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:admin": "playwright test --project=admin",
+    "test:public": "playwright test --project=admin-public",
+    "auth:login": "playwright codegen https://admin.govectora.com/sign-in --save-storage=.auth/admin.json",
+    "report": "playwright show-report",
+    "allure:generate": "allure generate allure-results -o allure-report --report-name \"Vectora Admin - Read-only E2E\"",
+    "allure:open": "allure open allure-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.5.0",
+    "allure": "^3.16.1",
+    "allure-commandline": "^2.43.0",
+    "allure-js-commons": "^3.12.0",
+    "allure-playwright": "^3.4.1",
+    "dotenv": "^17.2.2"
+  }
+}

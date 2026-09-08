@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "TestDino": {
+      "command": "npx",
+      "args": ["-y", "@testdino/mcp@latest"],
+      "env": {
+        "TESTDINO_PAT": "td_pat_replace_me"
+      }
+    }
+  }
+}

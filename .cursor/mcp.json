@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--caps=testing,devtools,storage",
+        "--output-dir=mcp-output",
+        "--save-trace",
+        "--ignore-https-errors"
+      ]
+    }
+  }
+}
