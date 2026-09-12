@@ -15,7 +15,7 @@ fs.mkdirSync('mcp-output/explore', { recursive: true });
 
 const blocked = [];
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 await page.route('**/*', async (route) => {
@@ -56,19 +56,26 @@ for (const path of [
 console.log('\n##### all sidebar hrefs');
 await page.goto('https://admin.govectora.com/', { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(2500);
-const hrefs = await page.locator('a[href]').evaluateAll((nodes) =>
-  Array.from(new Set(nodes.map((n) => n.getAttribute('href')))).filter(
-    (h) => h && h.startsWith('/'),
-  ),
-);
+const hrefs = await page
+  .locator('a[href]')
+  .evaluateAll((nodes) =>
+    Array.from(new Set(nodes.map((n) => n.getAttribute('href')))).filter(
+      (h) => h && h.startsWith('/'),
+    ),
+  );
 console.log('  ' + hrefs.join('\n  '));
 
 // 3. Notification bell popover.
 console.log('\n##### notifications');
 await page.getByRole('button', { name: 'Notifications' }).click();
 await page.waitForTimeout(2000);
-fs.writeFileSync('mcp-output/explore/notifications-popover.txt', await page.locator('body').ariaSnapshot());
-const viewAll = page.getByRole('link', { name: /view all/i }).or(page.getByRole('button', { name: /view all/i }));
+fs.writeFileSync(
+  'mcp-output/explore/notifications-popover.txt',
+  await page.locator('body').ariaSnapshot(),
+);
+const viewAll = page
+  .getByRole('link', { name: /view all/i })
+  .or(page.getByRole('button', { name: /view all/i }));
 console.log('  view-all count:', await viewAll.count());
 if (await viewAll.count()) {
   console.log('  view-all href:', await viewAll.first().getAttribute('href'));
@@ -81,11 +88,19 @@ if (await viewAll.count()) {
 console.log('\n##### global search');
 await page.goto('https://admin.govectora.com/', { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(2000);
-await page.getByRole('button', { name: /Search/ }).first().click();
+await page
+  .getByRole('button', { name: /Search/ })
+  .first()
+  .click();
 await page.waitForTimeout(1500);
 fs.writeFileSync('mcp-output/explore/global-search.txt', await page.locator('body').ariaSnapshot());
 console.log('  dialogs:', await page.getByRole('dialog').count());
-console.log('  searchboxes:', await page.getByRole('searchbox').count(), 'textboxes:', await page.getByRole('textbox').count());
+console.log(
+  '  searchboxes:',
+  await page.getByRole('searchbox').count(),
+  'textboxes:',
+  await page.getByRole('textbox').count(),
+);
 
 // 5. Driver availability and assignment history.
 for (const [name, path] of [

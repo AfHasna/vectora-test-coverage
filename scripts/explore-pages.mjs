@@ -26,7 +26,7 @@ const PAGES = [
 fs.mkdirSync('mcp-output/explore', { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 await page.route('**/*', async (route) => {
@@ -61,11 +61,22 @@ for (const [name, path] of PAGES) {
     console.log(`\n##### ${name}  ${path}`);
     console.log('  url:', page.url());
     console.log('  pageId:', await page.locator('html').getAttribute('data-active-page-id'));
-    console.log('  headings:', headings.map((h) => h.replace(/\s+/g, ' ').trim()).slice(0, 6).join(' | '));
+    console.log(
+      '  headings:',
+      headings
+        .map((h) => h.replace(/\s+/g, ' ').trim())
+        .slice(0, 6)
+        .join(' | '),
+    );
     console.log('  tabs:');
     for (const info of tabInfo) console.log('    -', info);
     console.log('  buttons:', buttons.join(' | '));
-    console.log('  tables:', await page.getByRole('table').count(), 'pagination:', await page.getByText(/of \d+ items/).count());
+    console.log(
+      '  tables:',
+      await page.getByRole('table').count(),
+      'pagination:',
+      await page.getByText(/of \d+ items/).count(),
+    );
   } catch (error) {
     console.log(`\n##### ${name}  ${path}  FAILED: ${error.message.split('\n')[0]}`);
   }

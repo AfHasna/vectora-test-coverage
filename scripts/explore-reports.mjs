@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 page.on('response', async (response) => {

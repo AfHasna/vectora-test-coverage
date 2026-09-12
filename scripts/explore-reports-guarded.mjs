@@ -11,7 +11,7 @@ const READ_ONLY_RPC = /\/rest\/v1\/rpc\/(?:get|list|search|count|fetch|check|has
 const AUTH = /\/auth\/v1\/|iam__auth-gateway|iam__2fa-otp|\/token\?grant_type/i;
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 await page.route('**/*', async (route) => {

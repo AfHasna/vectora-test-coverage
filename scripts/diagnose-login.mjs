@@ -20,8 +20,10 @@ page.on('request', (request) => {
     const body = request.postData();
     if (body) {
       // Show the shape of the payload without printing the secret.
-      const redacted = body.replace(/("password"\s*:\s*")([^"]*)(")/g, (_m, a, secret, c) =>
-        `${a}<${secret.length} chars, matches env: ${secret === password}>${c}`,
+      const redacted = body.replace(
+        /("password"\s*:\s*")([^"]*)(")/g,
+        (_m, a, secret, c) =>
+          `${a}<${secret.length} chars, matches env: ${secret === password}>${c}`,
       );
       console.log('   payload:', redacted.slice(0, 500));
     }

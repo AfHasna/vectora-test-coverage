@@ -17,7 +17,7 @@ fs.mkdirSync('mcp-output/explore', { recursive: true });
 
 const blocked = [];
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 await page.route('**/*', async (route) => {
@@ -65,7 +65,10 @@ await visit('/vehicles/assignment-history');
 await page.getByRole('button', { name: 'Filters' }).first().click();
 await page.waitForTimeout(1500);
 await controls('filters open');
-fs.writeFileSync('mcp-output/explore/history-filters.txt', await page.locator('main').ariaSnapshot());
+fs.writeFileSync(
+  'mcp-output/explore/history-filters.txt',
+  await page.locator('main').ariaSnapshot(),
+);
 
 // 3. Driver Compliance row action -> Compliance Details.
 console.log('\n##### compliance-drivers');
@@ -89,7 +92,10 @@ if (await lastCellButton.count()) {
       await page.getByRole('dialog').first().ariaSnapshot(),
     );
     const dialogHeadings = await page.getByRole('dialog').getByRole('heading').allInnerTexts();
-    console.log('    dialog headings:', dialogHeadings.map((t) => t.replace(/\s+/g, ' ').trim()).join(' | '));
+    console.log(
+      '    dialog headings:',
+      dialogHeadings.map((t) => t.replace(/\s+/g, ' ').trim()).join(' | '),
+    );
   }
 }
 
@@ -115,13 +121,25 @@ fs.writeFileSync('mcp-output/explore/notifications.txt', await page.locator('mai
 console.log('\n##### settings general');
 await visit('/settings/general');
 const sectionHeadings = await page.getByRole('button').allInnerTexts();
-console.log('    section buttons:', sectionHeadings.map((t) => t.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' | '));
-fs.writeFileSync('mcp-output/explore/settings-general.txt', await page.locator('main').ariaSnapshot());
+console.log(
+  '    section buttons:',
+  sectionHeadings
+    .map((t) => t.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join(' | '),
+);
+fs.writeFileSync(
+  'mcp-output/explore/settings-general.txt',
+  await page.locator('main').ariaSnapshot(),
+);
 
 // 7. Reports, to confirm the relaxed RPC rule fixes it.
 console.log('\n##### reports');
 await visit('/reports/trips', 6000);
-console.log("    couldn't-load banner:", await page.getByText(/Couldn't load this report/i).count());
+console.log(
+  "    couldn't-load banner:",
+  await page.getByText(/Couldn't load this report/i).count(),
+);
 console.log('    Total Runs present:', await page.getByText('Total Runs').count());
 
 console.log('\n##### BLOCKED REQUESTS');

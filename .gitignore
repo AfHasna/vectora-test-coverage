@@ -1,10 +1,6 @@
 node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+/reports/
 /.auth/
-/allure-results/
-/allure-report/
 /mcp-output/
+/playwright/.cache/
 .env

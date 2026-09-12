@@ -11,7 +11,7 @@ const READ_ONLY_RPC = /\/rest\/v1\/rpc\/(?:get|list|search|count|fetch|check|has
 const AUTH = /\/auth\/v1\/|iam__auth-gateway|iam__2fa-otp|\/token\?grant_type/i;
 
 const browser = await chromium.launch({ headless: false, slowMo: 250 });
-const context = await browser.newContext({ storageState: '.auth/admin.json' });
+const context = await browser.newContext({ storageState: '.auth/admin.prod.json' });
 const page = await context.newPage();
 
 await page.route('**/*', async (route) => {
@@ -30,10 +30,20 @@ await page.waitForLoadState('networkidle').catch(() => {});
 console.log('url:', page.url());
 console.log('active page id:', await page.locator('html').getAttribute('data-active-page-id'));
 console.log('=== CLIENTS PAGE ===');
-console.log((await page.locator('main').ariaSnapshot().catch(() => page.locator('body').ariaSnapshot())).slice(0, 4000));
+console.log(
+  (
+    await page
+      .locator('main')
+      .ariaSnapshot()
+      .catch(() => page.locator('body').ariaSnapshot())
+  ).slice(0, 4000),
+);
 
 const addClient = page.getByRole('button', { name: /add client/i }).first();
-console.log('add-client button count:', await page.getByRole('button', { name: /add client/i }).count());
+console.log(
+  'add-client button count:',
+  await page.getByRole('button', { name: /add client/i }).count(),
+);
 await addClient.click();
 await page.waitForTimeout(2500);
 

@@ -1,63 +1,79 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { currentEnvironment, DEFAULT_ROLE, storageStatePath } from './src/config/env';
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+const environment = currentEnvironment();
+const isCI = !!process.env.CI;
 
-const adminOrigin = process.env.ADMIN_BASE_URL ?? 'https://admin.govectora.com';
-const authFile = path.resolve(__dirname, '.auth/admin.json');
+/**
+ * Browsers are separate projects so a run can be limited to one:
+ *   npx playwright test --project=chromium
+ *
+ * Chromium is what CI uses; firefox and webkit exist for cross-browser passes
+ * and are not part of the default CI run.
+ */
+const browsers = [
+  { name: 'chromium', device: devices['Desktop Chrome'] },
+  { name: 'firefox', device: devices['Desktop Firefox'] },
+  { name: 'webkit', device: devices['Desktop Safari'] },
+] as const;
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: './src',
+  globalSetup: './src/setup/global-setup.ts',
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
   workers: 1,
-  timeout: 60_000,
-  expect: { timeout: 15_000 },
+  timeout: environment.timeouts.test,
+  expect: { timeout: environment.timeouts.expect },
+  outputDir: 'reports/traces',
   reporter: [
     ['list'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['html', { open: 'never', outputFolder: 'reports/html' }],
+    ['junit', { outputFile: 'reports/junit.xml' }],
+    ['json', { outputFile: 'reports/results.json' }],
     [
       'allure-playwright',
       {
-        resultsDir: 'allure-results',
+        resultsDir: 'reports/allure-results',
         // Report only the named test-case steps, not every Playwright API call.
         detail: false,
         environmentInfo: {
           Portal: 'Vectora Admin',
-          'Base URL': adminOrigin,
-          Mode: 'Read-only — writes blocked by request guard',
-          Browser: 'Chromium (headed)',
+          Environment: environment.name,
+          'Base URL': environment.baseURL,
+          Mode: environment.readOnly
+            ? 'Read-only — writes blocked by request guard'
+            : 'Read-write — data-changing cases enabled',
         },
       },
     ],
   ],
   use: {
-    baseURL: adminOrigin,
-    trace: 'retain-on-failure',
+    baseURL: environment.baseURL,
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 15_000,
-    navigationTimeout: 30_000,
+    actionTimeout: environment.timeouts.action,
+    navigationTimeout: environment.timeouts.navigation,
     // SLOWMO=400 makes a headed run easy to follow on screen.
     launchOptions: { slowMo: Number(process.env.SLOWMO ?? 0) },
   },
   projects: [
+    // Signs in once per role and saves the sessions the other projects reuse.
+    // Artifacts are off: a trace or failure snapshot would capture the
+    // credentials. The thrown error carries the server's own reason instead.
     {
       name: 'setup',
-      testMatch: /auth\.setup\.ts/,
-      // Traces, videos and failure snapshots of the login page would capture the
-      // credentials. The thrown error carries the server's reason instead.
-      use: { trace: 'off', screenshot: 'off', video: 'off' },
+      testMatch: /setup\/auth\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'], trace: 'off', screenshot: 'off', video: 'off' },
     },
-    // TC-VEC-001 signs in itself, so it starts without a session. Artifacts are
-    // off here because a trace or failure snapshot would capture the password.
+
+    // TC-VEC-001 signs in itself, so it starts without a session. Same reason
+    // for switching the artifacts off.
     {
-      name: 'admin-login',
-      testMatch: /login\/.*\.spec\.ts/,
+      name: 'auth',
+      testMatch: /tests\/auth\/.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -66,20 +82,20 @@ export default defineConfig({
         video: 'off',
       },
     },
-    // Approved cases, automated against the production admin, read-only.
-    {
-      name: 'admin',
-      testMatch: /admin\/.*\.spec\.ts/,
+
+    // The suite proper, one project per browser.
+    ...browsers.map(({ name, device }) => ({
+      name,
+      testMatch: /tests\/.*\.spec\.ts/,
+      testIgnore: [/tests\/auth\//, /tests\/backlog\//],
       dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: authFile,
-      },
-    },
-    // TC-VEC-001..036 awaiting approval. These only report; they never run.
+      use: { ...device, storageState: storageStatePath(DEFAULT_ROLE) },
+    })),
+
+    // Cases awaiting approval. These only report; they never run.
     {
-      name: 'suite-pending',
-      testMatch: /suite\/.*\.spec\.ts/,
+      name: 'backlog',
+      testMatch: /tests\/backlog\/.*\.spec\.ts/,
     },
   ],
 });
