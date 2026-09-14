@@ -1,0 +1,1265 @@
+[
+  {
+    "id": "ADM-TS-01",
+    "title": "Authentication, Roles & Permissions",
+    "cases": [
+      {
+        "id": "VCTR-ADM-001",
+        "title": "Valid login + OTP succeeds",
+        "preconditions": "Logged out",
+        "actionSteps": "1) Go to admin.govectora.com 2) Enter valid email/password 3) Submit 4) Enter valid 6-digit OTP 5) Submit",
+        "expected": "User lands on Dashboard (`/`); sidebar with 9 sections visible",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-002",
+        "title": "Invalid password rejected",
+        "preconditions": "Logged out",
+        "actionSteps": "1) Enter valid email + wrong password 2) Submit",
+        "expected": "Inline error shown; user remains on login screen; no OTP step reached",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-003",
+        "title": "Invalid/expired OTP rejected",
+        "preconditions": "At OTP screen",
+        "actionSteps": "1) Enter incorrect 6-digit code 2) Submit",
+        "expected": "Error shown; user not granted access; \"Resend\" control available with cooldown",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-004",
+        "title": "Session sign-out",
+        "preconditions": "Logged in",
+        "actionSteps": "1) Open account menu 2) Sign out",
+        "expected": "Redirected to login screen; protected routes no longer reachable without re-auth",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-005",
+        "title": "Edit Profile — cannot change role/email",
+        "preconditions": "Logged in",
+        "actionSteps": "1) Go to `/edit-profile` 2) Inspect form fields",
+        "expected": "Only first name, last name, phone, gender, avatar are editable; no role or email field present",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-006",
+        "title": "RBAC — sidebar filters by permission",
+        "preconditions": "Logged in as a restricted role (if available) or Super Admin for baseline",
+        "actionSteps": "1) Compare visible sidebar sections against the role's PermissionsMatrix (Settings→User Roles)",
+        "expected": "Only modules with `view` permission for that role appear in the sidebar (AdminSidebar filtering)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-007",
+        "title": "RBAC — action buttons gated",
+        "preconditions": "Any list module (e.g. Clients)",
+        "actionSteps": "1) As a role without `create`/`edit`/`archive` on that module, open the list",
+        "expected": "Add/Edit/Archive controls are hidden or disabled (PermissionGate); as Super Admin same controls are visible",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-008",
+        "title": "Super Admin cannot be archived",
+        "preconditions": "Settings → User Roles",
+        "actionSteps": "1) Open Super Admin role",
+        "expected": "Archive/Delete controls are absent or disabled for the Super Admin system role",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-009",
+        "title": "Custom role Add/Edit screen loads",
+        "preconditions": "Settings → User Roles",
+        "actionSteps": "1) Go to `/user-roles/add` 2) Observe PermissionsMatrix",
+        "expected": "Matrix renders per-module View/Create/Edit/Archive checkboxes matching documented module groups",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-02",
+    "title": "Dashboard (Home)",
+    "cases": [
+      {
+        "id": "VCTR-ADM-010",
+        "title": "Status Summary Cards render",
+        "preconditions": "Logged in, `/`",
+        "actionSteps": "1) Observe Clients/Drivers/Vehicles/Passengers cards",
+        "expected": "Each card shows status breakdown (e.g. Clients: Contracted/Vendor Listed/Backup Listed/Prospect/Draft), color dots, totals",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-011",
+        "title": "Card click navigates to filtered list",
+        "preconditions": "`/`",
+        "actionSteps": "1) Click a status dot/title on a card (e.g. Drivers → Compliant)",
+        "expected": "Navigates to the corresponding module list, pre-filtered by that status",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-012",
+        "title": "Compliance Summary 2×2 widget",
+        "preconditions": "`/`",
+        "actionSteps": "1) Observe Driver/Vehicle/Monitor/Provider panels",
+        "expected": "Each shows Compliant/Expiring/Non-Compliant counts, % progress bar, \"View Details\" link to correct route",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-013",
+        "title": "Today's Overview links work",
+        "preconditions": "`/`",
+        "actionSteps": "1) Click \"Active Trips\" row",
+        "expected": "Navigates to `/service-operations/active-trips`; count badge matches actual active trip count",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-014",
+        "title": "Realtime \"Last updated\" refresh",
+        "preconditions": "`/`",
+        "actionSteps": "1) Note \"Last updated\" timestamp 2) Wait 60+ seconds",
+        "expected": "Timestamp advances (poll cycle); no full-page reload required",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-015",
+        "title": "Dark/Light mode toggle",
+        "preconditions": "`/`",
+        "actionSteps": "1) Toggle header theme button",
+        "expected": "Theme switches instantly; sidebar remains navy in both modes; preference persists on reload",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-016",
+        "title": "Global Search (⌘K)",
+        "preconditions": "Any page",
+        "actionSteps": "1) Press Ctrl+K / ⌘K 2) Type a known client/driver/vehicle name",
+        "expected": "Fuzzy-matched result appears with highlighted characters; selecting it navigates to that record",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-017",
+        "title": "Sidebar collapse persists",
+        "preconditions": "Any page",
+        "actionSteps": "1) Press Ctrl+B or click collapse toggle 2) Reload page",
+        "expected": "Sidebar remains collapsed after reload (state persistence)",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-03",
+    "title": "Stakeholder Management: Clients",
+    "cases": [
+      {
+        "id": "VCTR-ADM-018",
+        "title": "Clients list loads with filters",
+        "preconditions": "`/stakeholders/clients`",
+        "actionSteps": "1) Open list 2) Filter by each status (Contracted/Vendor Listed/Backup Listed/Prospect/Draft)",
+        "expected": "List filters correctly; counts match Dashboard card",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-019",
+        "title": "Client 2-tab Add form structure",
+        "preconditions": "`/stakeholders/clients/add` (observe only, do not save)",
+        "actionSteps": "1) Open Add Client 2) Inspect tabs",
+        "expected": "Tab 1 Basic Info & Contacts (name, email, type from Reference Data, contacts w/ extension, addresses); Tab 2 Contracts & Pricing (8 fee fields) present",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-020",
+        "title": "Client View — Portal Access tab (Edit mode only)",
+        "preconditions": "Open an existing client in Edit",
+        "actionSteps": "1) Go to Portal Access tab",
+        "expected": "Lists existing client portal users (name/email/role badge/creation date, Active/Not Activated badge); Create/Reset/Revoke controls visible per permission",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-021",
+        "title": "Admin email guard on portal accounts",
+        "preconditions": "Portal Access tab",
+        "actionSteps": "1) Attempt to create a portal user with a known staff/admin email (do not submit)",
+        "expected": "Validation should block staff/admin emails — verify client-side validation message appears (cancel before submit)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-022",
+        "title": "Client Archive pre-flight (observe only)",
+        "preconditions": "Existing client with linked places/passengers",
+        "actionSteps": "1) Open Archive action 2) Observe dialog — **do not confirm**",
+        "expected": "Linked Records dialog lists dependent Places/Passengers/etc.; primary button reads exactly \"Archive\" (amber); critical items require checkbox before button enables",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-023",
+        "title": "Status History audit log visible",
+        "preconditions": "Existing client View panel",
+        "actionSteps": "1) Scroll to Status History section",
+        "expected": "Old→new status entries with user + timestamp are listed; \"Show more/less\" toggle works",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-024",
+        "title": "Table export controls",
+        "preconditions": "Clients list",
+        "actionSteps": "1) Trigger Excel export 2) Trigger PDF export (or verify buttons present/enabled)",
+        "expected": "Export controls present and enabled per permission; file-generation triggers without error",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-025",
+        "title": "Pagination defaults",
+        "preconditions": "Clients list with \\>10 records",
+        "actionSteps": "1) Observe default page size 2) Change to 25/50/100",
+        "expected": "Default is 10; row numbering persists across pages; \"Showing X-Y of Z\" updates correctly",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-04",
+    "title": "Stakeholder Management: Client Monitors",
+    "cases": [
+      {
+        "id": "VCTR-ADM-026",
+        "title": "List + Add form fields",
+        "preconditions": "`/stakeholders/client-monitors`",
+        "actionSteps": "1) Open Add Monitor (observe only)",
+        "expected": "Fields: first/last name, gender, phone, email, client (searchable dropdown), address via Google Places popup",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-027",
+        "title": "Client Monitor linkage to Passengers",
+        "preconditions": "Existing monitor linked to a client",
+        "actionSteps": "1) Open a Passenger using this monitor as \"Client Monitor\" type",
+        "expected": "Monitor appears correctly as a selectable/linked \"Client Monitor\" on the passenger's Needs & Assignments tab",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-028",
+        "title": "Archive/Restore toggle",
+        "preconditions": "Client Monitors list",
+        "actionSteps": "1) Toggle Active/Archived view",
+        "expected": "Toolbar remains visible when list is empty; archived items reappear under Archived filter",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-05",
+    "title": "Stakeholder Management: Places",
+    "cases": [
+      {
+        "id": "VCTR-ADM-029",
+        "title": "Place default status is Draft",
+        "preconditions": "Add Place form (observe only)",
+        "actionSteps": "1) Open Add Place",
+        "expected": "New place defaults to Draft status; lifecycle Draft→Active→Inactive documented in status control",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-030",
+        "title": "Embedded calendar tab present",
+        "preconditions": "Existing Place, View/Edit",
+        "actionSteps": "1) Open Calendars tab",
+        "expected": "Calendar/holiday configuration UI is present and embedded within the Place record",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-031",
+        "title": "Place feeds Route Sheet schedule exceptions",
+        "preconditions": "Place with a holiday configured; Route Sheet referencing that place",
+        "actionSteps": "1) Open a Route Sheet using this place 2) Check for holiday/early-release indicator",
+        "expected": "Route Sheet wizard surfaces holiday/early-release info sourced from the place's calendar",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-06",
+    "title": "Stakeholder Management: Guardians",
+    "cases": [
+      {
+        "id": "VCTR-ADM-032",
+        "title": "Guardians Add/Edit is dialog-based (no /add route)",
+        "preconditions": "`/stakeholders/guardians`",
+        "actionSteps": "1) Click Add Guardian 2) Observe URL",
+        "expected": "Dialog opens in place; URL does not change to `/add` (matches \"Vehicles pattern\")",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-033",
+        "title": "Passenger count column behavior",
+        "preconditions": "Guardians list",
+        "actionSteps": "1) Inspect a guardian with 0 linked passengers, 1, and \\>1",
+        "expected": "0 shows muted icon; 1 shows clickable passenger name → profile dialog; \\>1 shows count + icon → RoutePassengersDialog; archived passengers excluded from count",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-034",
+        "title": "Guardian linked from Passenger Contacts",
+        "preconditions": "Passenger Contacts tab",
+        "actionSteps": "1) Open a passenger's Contacts tab 2) Add/observe a guardian entry",
+        "expected": "Guardian created/linked here also appears in the central Guardians registry",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-035",
+        "title": "Guardian Mobile App Access entry point",
+        "preconditions": "Guardian Edit dialog",
+        "actionSteps": "1) Open Edit on a guardian",
+        "expected": "\"Mobile App Access\" control is present (links to Guardian App user provisioning)",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-07",
+    "title": "Stakeholder Management: Passengers",
+    "cases": [
+      {
+        "id": "VCTR-ADM-036",
+        "title": "4-tab Add form structure",
+        "preconditions": "Add Passenger (observe only)",
+        "actionSteps": "1) Open Add Passenger 2) Inspect all 4 tabs",
+        "expected": "Tab 1 Basic Info; Tab 2 Contacts (guardians/emergency, \"Copy from Guardian\"); Tab 3 Needs & Assignments (clients, equipment, special ed, vehicle type, monitors); Tab 4 Transportation Details (addresses/places/schedules)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-037",
+        "title": "Monitor type selection dialog",
+        "preconditions": "Tab 3, Add Monitor",
+        "actionSteps": "1) Click Add Monitor",
+        "expected": "Dialog offers \"Monitor\" (manual entry) vs \"Client Monitor\" (from linked clients)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-038",
+        "title": "Passenger status lifecycle control",
+        "preconditions": "Existing passenger",
+        "actionSteps": "1) Open inline status control",
+        "expected": "Options reflect Draft → Active → Inactive only",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-039",
+        "title": "Deactivation removes future runs (verify notice only)",
+        "preconditions": "Passenger with upcoming scheduled runs",
+        "actionSteps": "1) Locate documentation/tooltip describing this behavior; **do not actually deactivate** in production",
+        "expected": "Confirm the deactivation warning / notification behavior described in Workflows KB is reflected in the UI copy when the status-change dialog is opened (cancel before confirming)",
+        "pri": "P2",
+        "regr": "No — requires sandbox to fully execute"
+      },
+      {
+        "id": "VCTR-ADM-040",
+        "title": "Passenger↔Route Sheet vehicle type sync",
+        "preconditions": "Passenger with Vehicle Type set; linked Route Sheet",
+        "actionSteps": "1) Compare passenger's Vehicle Type field to the Route Sheet's Vehicle Type",
+        "expected": "Values are consistent (bidirectional sync per Module Interconnections map)",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-08",
+    "title": "Workforce Management: Drivers",
+    "cases": [
+      {
+        "id": "VCTR-ADM-041",
+        "title": "4-tab Add form structure",
+        "preconditions": "Add Driver (observe only)",
+        "actionSteps": "1) Open Add Driver 2) Inspect tabs",
+        "expected": "Basic Info; Service & Assignment; License & Documents; Payment Info tabs all present",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-042",
+        "title": "Driver status options",
+        "preconditions": "Existing driver",
+        "actionSteps": "1) Open inline status control",
+        "expected": "Options: Active / Suspended / Terminated / Inactive",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-043",
+        "title": "Driver compliance badge reflects thresholds",
+        "preconditions": "Driver with license nearing expiry",
+        "actionSteps": "1) Compare badge color to Settings → Compliance Thresholds (default 30d amber / 7d red)",
+        "expected": "Badge color matches configured thresholds",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-044",
+        "title": "Driver App account section",
+        "preconditions": "Settings → Driver App Users, or Driver record",
+        "actionSteps": "1) Locate mobile-account create/reset/revoke controls",
+        "expected": "Controls present and permission-gated (Super Admin / documented roles only)",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-09",
+    "title": "Workforce Management: Drivers Availability",
+    "cases": [
+      {
+        "id": "VCTR-ADM-045",
+        "title": "Weekly AM/PM matrix renders",
+        "preconditions": "`/workforce/drivers-availability`",
+        "actionSteps": "1) Open page",
+        "expected": "Grid shows drivers × week with AM/PM cells; Green=Available, Amber=Assigned with route-ID tooltip",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-046",
+        "title": "5 filters function",
+        "preconditions": "Availability page",
+        "actionSteps": "1) Apply Driver Name, Status, Compliance, Availability, Vehicle filters individually",
+        "expected": "Each filter narrows the grid correctly; combinable",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-047",
+        "title": "Week navigation",
+        "preconditions": "Availability page",
+        "actionSteps": "1) Click next/prev week arrows 2) Click \"This Week\"",
+        "expected": "Grid updates to selected week; \"This Week\" returns to current week",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-10",
+    "title": "Fleet Management: Vehicles",
+    "cases": [
+      {
+        "id": "VCTR-ADM-048",
+        "title": "Add Vehicle form tabs",
+        "preconditions": "Add Vehicle (observe only)",
+        "actionSteps": "1) Open Add Vehicle 2) Inspect tabs",
+        "expected": "Basic (plate, year, make, model, color, VIN, capacity, type, status), Registration, Insurance, Equipment, Photos tabs present",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-049",
+        "title": "Inline status change (3 states)",
+        "preconditions": "Vehicles list",
+        "actionSteps": "1) Open inline status selector on a vehicle",
+        "expected": "Options: Available, Maintenance, Out of Service; control only enabled with `fleet.edit` permission",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-050",
+        "title": "Archived vehicles excluded from pickers",
+        "preconditions": "Vehicles list w/ an archived vehicle",
+        "actionSteps": "1) Open a driver/route assignment vehicle picker",
+        "expected": "Archived vehicle does not appear as selectable",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-051",
+        "title": "7D vs State Inspection due-date logic",
+        "preconditions": "Vehicle with inspection dates set",
+        "actionSteps": "1) Compare entered inspection date to displayed next-due date",
+        "expected": "State: +12 months. 7D (MA): Feb–Mar→Nov 30 same year; Oct–Nov→Mar 31 next year, per documented windows",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-052",
+        "title": "Vehicle View — Recent Assignment History card",
+        "preconditions": "Vehicle with assignment history",
+        "actionSteps": "1) Open Vehicle View",
+        "expected": "Card shows last 5 assignments",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-11",
+    "title": "Fleet Management: Maintenance",
+    "cases": [
+      {
+        "id": "VCTR-ADM-053",
+        "title": "Priority levels present",
+        "preconditions": "Add/Edit Maintenance record (observe only)",
+        "actionSteps": "1) Open priority dropdown",
+        "expected": "Low, Medium, High, Urgent options present",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-054",
+        "title": "Status lifecycle",
+        "preconditions": "Existing maintenance record",
+        "actionSteps": "1) Open status control",
+        "expected": "Scheduled → In Progress → Completed / Cancelled",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-055",
+        "title": "Overdue maintenance flags Vehicle Compliance",
+        "preconditions": "Maintenance record past scheduled date, still Scheduled",
+        "actionSteps": "1) Check Vehicle Compliance / Dashboard non-compliant count",
+        "expected": "Overdue record counts toward Vehicle non-compliant total",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-12",
+    "title": "Fleet Management: Assignment History",
+    "cases": [
+      {
+        "id": "VCTR-ADM-056",
+        "title": "Date range + Day/Week/Month grouping",
+        "preconditions": "`/vehicles/assignment-history`",
+        "actionSteps": "1) Apply a date range 2) Switch grouping",
+        "expected": "Results filter/group correctly",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-057",
+        "title": "Driver/Vehicle dropdown filters",
+        "preconditions": "Assignment History",
+        "actionSteps": "1) Filter by a specific driver, then a specific vehicle",
+        "expected": "Table narrows to matching records only",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-058",
+        "title": "Export",
+        "preconditions": "Assignment History",
+        "actionSteps": "1) Trigger Excel/PDF export",
+        "expected": "Export completes without error",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-13",
+    "title": "Service Operations: Route Sheets (Wizard & Lifecycle)",
+    "cases": [
+      {
+        "id": "VCTR-ADM-059",
+        "title": "2-step wizard structure",
+        "preconditions": "`/service-operations/route-sheets` → Add (observe only, do not save)",
+        "actionSteps": "1) Open wizard 2) Inspect Step 1 and Step 2",
+        "expected": "Step 1: passengers/monitors, locations only, no manual time inputs. Step 2: shared config, Google Maps, stops table, per-stop ETA Adjustment as the only manual time lever",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-060",
+        "title": "Paired RSO/RSR numbering",
+        "preconditions": "Existing route sheet pair",
+        "actionSteps": "1) Open an Outbound and its paired Return sheet",
+        "expected": "Same numeric suffix, RSO- and RSR- prefixes respectively",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-061",
+        "title": "Route Sheet status lifecycle & allowed transitions",
+        "preconditions": "Existing route sheets in various statuses",
+        "actionSteps": "1) Inspect status control options at each state",
+        "expected": "Draft→Confirmed→Assigned→Expired, plus On Hold and Deactivated/Inactive per documented transition table; illegal transitions not offered",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-062",
+        "title": "On Hold requires start+end date",
+        "preconditions": "Route sheet Place On Hold action (observe only)",
+        "actionSteps": "1) Open \"Place On Hold\" dialog",
+        "expected": "Both hold\\_start\\_date and hold\\_end\\_date required before confirm enabled",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-063",
+        "title": "Bulk Confirm workflow",
+        "preconditions": "Route Sheets list, multiple Draft rows",
+        "actionSteps": "1) Select multiple via checkbox 2) Observe \"Confirm Selected\" toolbar (do not execute)",
+        "expected": "Bulk toolbar shows selection count; button present and correctly labeled",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-064",
+        "title": "Auto-sync from Passenger schedule (read-only in wizard)",
+        "preconditions": "Route Sheet referencing a passenger",
+        "actionSteps": "1) Compare Service Dates/Active Days shown in wizard vs. passenger's Transportation Details tab",
+        "expected": "Values match; wizard shows \"Edit in Passenger Profile\" link rather than inline edit",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-065",
+        "title": "ETA/STA mismatch warning",
+        "preconditions": "Route Sheet View, a stop missing STA or ETA far from STA",
+        "actionSteps": "1) Open Route Sheet View",
+        "expected": "Warning indicator appears on the affected stop row",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-14",
+    "title": "Service Operations: Routes Assignment & Generate Runs",
+    "cases": [
+      {
+        "id": "VCTR-ADM-066",
+        "title": "Default filter hides fully-assigned routes",
+        "preconditions": "`/service-operations/routes-assignment`",
+        "actionSteps": "1) Load page default 2) Toggle \"Include assigned trips\"",
+        "expected": "Default view hides fully-assigned; toggle reveals all",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-067",
+        "title": "Status dot color coding",
+        "preconditions": "Routes Assignment list",
+        "actionSteps": "1) Inspect dots across statuses",
+        "expected": "Gray=Draft, Blue=Confirmed, Green=Assigned, Red=Expired",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-068",
+        "title": "Generate Runs button present & gated",
+        "preconditions": "Toolbar",
+        "actionSteps": "1) Locate \"Generate Runs\" button",
+        "expected": "Present, correctly permission-gated to `routes_assignment:edit`; **do not click** in production",
+        "pri": "P1",
+        "regr": "Yes — verify presence/gating only"
+      },
+      {
+        "id": "VCTR-ADM-069",
+        "title": "Drivers Availability overlay from assignment dialog",
+        "preconditions": "Open an assignment row",
+        "actionSteps": "1) Open \"Drivers Availability\" from within the dialog",
+        "expected": "Availability overlay opens without leaving the assignment flow",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-070",
+        "title": "Future trips are read-only / no dispatch",
+        "preconditions": "Future Trips tab",
+        "actionSteps": "1) Attempt to find a \"Send Trip Offer\" or dispatch action on a future-dated trip",
+        "expected": "No dispatch action available; trip remains `scheduled`",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-15",
+    "title": "Service Operations: Active / Future / Trips History",
+    "cases": [
+      {
+        "id": "VCTR-ADM-071",
+        "title": "Active Trips SLA overdue banner",
+        "preconditions": "Active Trips with an overdue trip (if present)",
+        "actionSteps": "1) Observe summary banner",
+        "expected": "Banner shows \"X overdue trips · Y overdue passengers\"; click toggles overdue-only filter with clearable badge",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-072",
+        "title": "Completed trips auto-sort to bottom",
+        "preconditions": "Active Trips with mixed statuses",
+        "actionSteps": "1) Observe ordering",
+        "expected": "Completed trips appear after in-progress/pending ones",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-073",
+        "title": "PassengerStatusList expand/collapse",
+        "preconditions": "Active Trips row",
+        "actionSteps": "1) Expand a trip's passenger summary (e.g. \"2/4 Picked Up\")",
+        "expected": "Individual passenger statuses shown on expand",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-074",
+        "title": "Trip & passenger status values match spec",
+        "preconditions": "Any trip",
+        "actionSteps": "1) Inspect all reachable status values",
+        "expected": "Trip: Scheduled/Dispatched/Accepted/In Progress/Completed/Cancelled. Passenger: Pending/Arrived/Picked Up/Dropped Off/Early Cancel/Late Cancel/No Show",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-075",
+        "title": "Trips History read-only",
+        "preconditions": "`/service-operations/trips-history`",
+        "actionSteps": "1) Inspect available actions on a historical trip",
+        "expected": "No status-changing actions available beyond viewing/activity log",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-076",
+        "title": "Inactive-passenger indicator icon",
+        "preconditions": "A route with ≥1 inactive passenger",
+        "actionSteps": "1) Locate red person-with-X icon next to route number",
+        "expected": "Icon present on Route Sheets/Assignment/Live Tracking/Future rows; click opens inactive-passenger popup only (no other action)",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-16",
+    "title": "Incident Reports & Trip Activity Log",
+    "cases": [
+      {
+        "id": "VCTR-ADM-077",
+        "title": "Incident auto-generated from No Show/Cancel",
+        "preconditions": "Existing No Show / Late Cancel / Early Cancellation event",
+        "actionSteps": "1) Open Incident Reports",
+        "expected": "Corresponding incident entry exists, linked to the source trip/passenger",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-078",
+        "title": "Activity Logs tab is read-only",
+        "preconditions": "Trip Activity dialog",
+        "actionSteps": "1) Open Activity Logs tab",
+        "expected": "Entries are system-generated, read-only; columns #, Action, Status old→new, Done By, Date/Time",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-079",
+        "title": "Notes tab supports add",
+        "preconditions": "Trip Activity dialog",
+        "actionSteps": "1) Open Notes tab 2) Observe compose box (do not necessarily submit, or submit a clearly-marked test note only if permitted)",
+        "expected": "Compose area + Send button present; Ctrl/Cmd+Enter shortcut documented",
+        "pri": "P3",
+        "regr": "No — mutating, confirm with user before executing"
+      },
+      {
+        "id": "VCTR-ADM-080",
+        "title": "Activity Log filters",
+        "preconditions": "Trip Activity dialog",
+        "actionSteps": "1) Apply All/Status Changes/Assignments/Cancellations filters",
+        "expected": "List narrows correctly per filter",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-17",
+    "title": "Live Tracking",
+    "cases": [
+      {
+        "id": "VCTR-ADM-081",
+        "title": "Live Tracking opens as full-screen overlay",
+        "preconditions": "Routes page header",
+        "actionSteps": "1) Click \"Live Tracking\"",
+        "expected": "Full-screen dialog with Status Summary Bar, map panel, compact trip cards",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-082",
+        "title": "Permission gate `live_tracking.view`",
+        "preconditions": "As a role without this permission (if available)",
+        "actionSteps": "1) Attempt to access Live Tracking",
+        "expected": "Action/button hidden or blocked",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-18",
+    "title": "Compliance Management",
+    "cases": [
+      {
+        "id": "VCTR-ADM-083",
+        "title": "Standalone Compliance Management section",
+        "preconditions": "Sidebar",
+        "actionSteps": "1) Open Compliance Management",
+        "expected": "Driver/Vehicle/Monitor compliance tabs present (Provider per Dashboard widget)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-084",
+        "title": "Compliance Details dialog",
+        "preconditions": "Vehicle/Driver compliance list",
+        "actionSteps": "1) Open a record's Compliance Details",
+        "expected": "Single dialog with status banner, expirations, documents, outstanding issues",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-085",
+        "title": "Threshold change propagates",
+        "preconditions": "Settings → Compliance Thresholds (observe values, do not change in production)",
+        "actionSteps": "1) Note current Expiring(30)/Critical(7) values 2) Cross-check a driver near that boundary",
+        "expected": "Badge coloring on Drivers/Vehicles/Monitors/Dashboard consistent with configured thresholds",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-19",
+    "title": "Settings: General",
+    "cases": [
+      {
+        "id": "VCTR-ADM-086",
+        "title": "Company tab fields",
+        "preconditions": "`/settings/general`",
+        "actionSteps": "1) Inspect fields",
+        "expected": "Company Name, Full Legal Name, Support Email; no global Default Timezone field (removed)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-087",
+        "title": "Billing & Invoice tab fields",
+        "preconditions": "`/settings/general/billing`",
+        "actionSteps": "1) Inspect fields",
+        "expected": "Tax ID (EIN), Company Phone, Billing Email, Company Address",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-088",
+        "title": "Compliance Thresholds tab",
+        "preconditions": "`/settings/general/compliance-thresholds`",
+        "actionSteps": "1) Inspect fields/defaults",
+        "expected": "Expiring default 30, Critical default 7",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-089",
+        "title": "Trip SLA tab defaults",
+        "preconditions": "`/settings/general/trip-sla`",
+        "actionSteps": "1) Inspect defaults",
+        "expected": "Accept Deadline 90 min, Start Grace 5, Pickup Grace 10, Dropoff Grace 10, GPS Stale-Offline 2 (range 1–30)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-090",
+        "title": "Request SLA tab defaults",
+        "preconditions": "`/settings/general/request-sla`",
+        "actionSteps": "1) Inspect per-type defaults",
+        "expected": "Trip Cancellation 2d, On-Demand 2d, Account Deletion 7d, Passenger Request 14d, Driver Change 7d, Monitor Change 7d",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-091",
+        "title": "Route Timing Defaults tab",
+        "preconditions": "`/settings/general/trip-timing`",
+        "actionSteps": "1) Inspect defaults",
+        "expected": "Dwell Home 3, Dwell School 5, Arrival Buffer 10, Departure Buffer 5, ETA/STA Warning 15",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-092",
+        "title": "Trip Generation tab",
+        "preconditions": "`/settings/general/trip-generation`",
+        "actionSteps": "1) Inspect defaults",
+        "expected": "Daily Generation Time 02:00 (reference), Same-Day Cutoff 06:00",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-093",
+        "title": "`settings:edit` permission gates Save",
+        "preconditions": "As a view-only role (if available)",
+        "actionSteps": "1) Attempt to edit a General field",
+        "expected": "Save is disabled/hidden without `settings.edit`",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-20",
+    "title": "Settings: Reference Data",
+    "cases": [
+      {
+        "id": "VCTR-ADM-094",
+        "title": "7 sub-tabs present",
+        "preconditions": "`/settings/reference-data`",
+        "actionSteps": "1) Inspect tabs",
+        "expected": "Client Types, Place Types, Service Types, Special Ed, Vehicle Type, Vehicle Equipment, Passenger Equipment",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-095",
+        "title": "Delete-with-undo (5s toast)",
+        "preconditions": "A reference item, non-critical (observe only — confirm with user before actually deleting any real item)",
+        "actionSteps": "1) Locate delete action 2) Observe confirmation dialog copy",
+        "expected": "Dialog and toast pattern match documented 5-second undo window",
+        "pri": "P2",
+        "regr": "No — mutating, needs sandbox or explicit go-ahead"
+      },
+      {
+        "id": "VCTR-ADM-096",
+        "title": "Reference data populates dependent dropdowns",
+        "preconditions": "Clients/Places/Vehicles Add forms",
+        "actionSteps": "1) Open each form's relevant dropdown",
+        "expected": "Values match current Reference Data entries",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-21",
+    "title": "Settings: Knowledge Base",
+    "cases": [
+      {
+        "id": "VCTR-ADM-097",
+        "title": "KB accessible regardless of Settings permission",
+        "preconditions": "As any authenticated role",
+        "actionSteps": "1) Navigate to `/settings/knowledge-base`",
+        "expected": "Page loads and is readable even without `settings.view`",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-098",
+        "title": "Section switcher covers all 8 sections",
+        "preconditions": "KB page",
+        "actionSteps": "1) Open section switcher",
+        "expected": "System Overview, User Roles & Permissions, Modules Guide, Workflows & Flows, Reference Data, Settings Guide (General Settings), Design System, Technical Reference all present",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-099",
+        "title": "Search within KB",
+        "preconditions": "KB page",
+        "actionSteps": "1) Type a known term in \"Search documentation…\"",
+        "expected": "Relevant section/snippet surfaces",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-100",
+        "title": "Download PDF",
+        "preconditions": "KB page",
+        "actionSteps": "1) Click \"Download PDF\"",
+        "expected": "PDF generates (jsPDF/Helvetica) without error",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-101",
+        "title": "KB content matches live product behavior (this exercise)",
+        "preconditions": "Cross-reference KB Workflows page vs. observed UI in ADM-TS-13/ADM-TS-14",
+        "actionSteps": "1) Compare route sheet lifecycle table in KB to actual status control options",
+        "expected": "No contradictions between documented and observed lifecycle/transition rules",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-22",
+    "title": "Settings: Users",
+    "cases": [
+      {
+        "id": "VCTR-ADM-102",
+        "title": "Admin Users list & create form",
+        "preconditions": "`/settings/users`",
+        "actionSteps": "1) Inspect list 2) Open Add (observe only)",
+        "expected": "Create fields: name, email, password, role; existing users editable, resettable, deletable",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-103",
+        "title": "Admin user delete = permanent",
+        "preconditions": "Add user form / docs",
+        "actionSteps": "1) Confirm delete copy language (do not delete a real account)",
+        "expected": "Delete is documented as permanently removing the Auth account (irreversible) — verify warning copy reflects this",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-104",
+        "title": "Client Portal Users tab",
+        "preconditions": "`/settings/client-portal-users`",
+        "actionSteps": "1) Inspect list scoped per client",
+        "expected": "JWT app\\_metadata client\\_id scoping; create/revoke/reset controls present",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-105",
+        "title": "Driver App Users tab",
+        "preconditions": "`/settings/driver-app-users`",
+        "actionSteps": "1) Inspect list",
+        "expected": "Create/reset/revoke mobile access controls present, linked to driver record",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-106",
+        "title": "Service Provider Portal Users — read-only roster here",
+        "preconditions": "`/settings/service-provider-portal-users`",
+        "actionSteps": "1) Inspect page",
+        "expected": "Roster is read-only; actual create/revoke/reset happens via Workforce → Service Providers → Edit → Portal Access",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-107",
+        "title": "Guardian App Users — read-only roster here",
+        "preconditions": "`/settings/guardian-app-users`",
+        "actionSteps": "1) Inspect page",
+        "expected": "Lists only guardians with `user_id` set; create/reset/revoke via Stakeholders → Guardians → Edit → Mobile App Access",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-108",
+        "title": "User-management actions require super\\_admin",
+        "preconditions": "As non-super-admin (if available)",
+        "actionSteps": "1) Attempt to reach Users create/edit/delete actions",
+        "expected": "Blocked or hidden; edge functions documented as requiring `super_admin`",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-23",
+    "title": "Requests (SLA Monitoring)",
+    "cases": [
+      {
+        "id": "VCTR-ADM-109",
+        "title": "Requests page loads",
+        "preconditions": "`/requests`",
+        "actionSteps": "1) Open page",
+        "expected": "List of external requests (Trip Cancellation, On-Demand, Account Deletion, Passenger Request, Driver Change, Monitor Change)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-110",
+        "title": "Overdue flagging by per-type SLA",
+        "preconditions": "A pending request older than its type's SLA days",
+        "actionSteps": "1) Locate the request",
+        "expected": "Flagged \"Overdue\" per Settings → Request SLA type default",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-24",
+    "title": "Notifications",
+    "cases": [
+      {
+        "id": "VCTR-ADM-111",
+        "title": "Notification bell + full history page",
+        "preconditions": "Header bell icon",
+        "actionSteps": "1) Open bell popover 2) Click \"View all notifications\"",
+        "expected": "`/notifications` loads full history with FilterCard (Category/Priority/Status/Date Range)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-112",
+        "title": "Personal scoping (RLS)",
+        "preconditions": "Any user",
+        "actionSteps": "1) Compare visible notifications to the logged-in user",
+        "expected": "Only this user's notifications are shown; no permission gating beyond identity",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-113",
+        "title": "Mark all as read",
+        "preconditions": "Notifications page with unread items",
+        "actionSteps": "1) Click bulk \"Mark all as read\"",
+        "expected": "Unread highlighting clears for all listed items",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-114",
+        "title": "Click-through to related entity",
+        "preconditions": "An unread notification (e.g. compliance alert)",
+        "actionSteps": "1) Click the notification",
+        "expected": "Navigates to the related entity (driver/vehicle/route)",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-25",
+    "title": "Cross-cutting: Archive/Delete Safety & Status History",
+    "cases": [
+      {
+        "id": "VCTR-ADM-115",
+        "title": "Verb rule — Archive vs Delete only",
+        "preconditions": "Any Archive/Delete confirmation across modules",
+        "actionSteps": "1) Trigger the dialog (cancel before confirming) on Clients, Drivers, Vehicles, Route Sheets",
+        "expected": "Primary button always reads exactly \"Archive\" or \"Delete\" — never Remove/Continue Anyway/OK/Confirm/Proceed/Yes",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-116",
+        "title": "Critical-tier checkbox gate",
+        "preconditions": "An entity with critical dependencies",
+        "actionSteps": "1) Open Archive dialog 2) Observe checkbox requirement",
+        "expected": "Primary button stays disabled until \"I understand this will affect the records above\" is ticked",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-117",
+        "title": "Restore from Archived view",
+        "preconditions": "Archived-view toggle on any supported module",
+        "actionSteps": "1) Toggle to Archived 2) Locate a record's Restore action",
+        "expected": "Restore option present in row ⋯ menu",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-118",
+        "title": "Hard-delete prevention trigger",
+        "preconditions": "Attempt (observe only) to find a hard-delete path on a critical entity",
+        "actionSteps": "1) Search for any UI path that would hard-delete a Client/Driver/Vehicle/Passenger/Place/Route Sheet",
+        "expected": "No such path exists in the UI — only Archive is offered, consistent with the documented DB trigger blocking DELETE on 8 critical tables",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-119",
+        "title": "Status History present on all documented entities",
+        "preconditions": "Clients, Client Monitors, Passengers, Route Sheets, Places, Vehicles, Drivers, Users",
+        "actionSteps": "1) Open View panel for one record of each type",
+        "expected": "Status History section present, expanded by default, \"Show more/less\" available",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "ADM-TS-26",
+    "title": "Cross-cutting: Navigation & Search",
+    "cases": [
+      {
+        "id": "VCTR-ADM-120",
+        "title": "Breadcrumbs are context-aware",
+        "preconditions": "Various pages",
+        "actionSteps": "1) Navigate to Add/Edit screens across modules",
+        "expected": "Breadcrumb shows correct contextual label (e.g. \"Add Client\", \"Edit Driver\"); record UUIDs hidden from path",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-121",
+        "title": "Hover flyout sub-menus",
+        "preconditions": "Sidebar, collapsed and expanded states",
+        "actionSteps": "1) Hover each top-level sidebar item",
+        "expected": "Flyout lists correct sub-tabs; nested flyout for Settings → Reference Data",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-ADM-122",
+        "title": "Global Search entity coverage",
+        "preconditions": "⌘K palette",
+        "actionSteps": "1) Search a known Client, Passenger, Driver, Vehicle name each",
+        "expected": "Each entity type returns a match per documented \"Entity Categories Searched\"",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-ADM-123",
+        "title": "Search relevance & highlight",
+        "preconditions": "⌘K palette",
+        "actionSteps": "1) Type a partial/fuzzy query",
+        "expected": "Matching characters highlighted (teal); browse mode shows 10/category, search mode up to 200 relevance-sorted",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  }
+]

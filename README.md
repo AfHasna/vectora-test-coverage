@@ -1,94 +1,56 @@
-# Vectora Playwright tests
+# Vectora regression tests
 
-End-to-end tests for the Vectora admin portal.
+Playwright scripts for the Vectora **Admin Portal**, **Client Portal**, and **Service Provider Portal**. The folder layout is **Page → Test Set → Test Sequence**, matching the Confluence test plans 1:1: one product page folder, one spec file per Test Set, one `test()` per VCTR row in table order.
 
-Production (`https://admin.govectora.com/`) is **read-only by rule**: no record
-may be created, edited, archived, or deleted. A request guard enforces this at
-runtime, so a mistake in a spec cannot write. Cases that do change data run on
-staging only and are held in the backlog until a staging domain exists.
+## Why this layout
 
-## Layout
+Each Confluence Test Set is already one module/page. The spec file is that set; cases inside it run in **serial VCTR order** so the report sequence matches the source table. Files (and portals) can run in parallel.
+
+| Portal | IDs | Plan |
+| --- | --- | --- |
+| Admin Portal | `VCTR-ADM-001` … `123` | [Admin Portal — Regression Test Plan](https://govectora.atlassian.net/wiki/x/cwDE) |
+| Client Portal | `VCTR-CP-001` … `042` | [Client Portal — Regression Test Plan](https://govectora.atlassian.net/wiki/x/1ADD) |
+| Service Provider Portal | `VCTR-SP-001` … `040` | [Service Provider Portal — Regression Test Plan](https://govectora.atlassian.net/wiki/x/6QDD) |
+
+Hub: [Vectora QA — Regression Test Plans](https://govectora.atlassian.net/wiki/x/vwDD). Cross-app context only (no specs): [Connected Flow](https://govectora.atlassian.net/wiki/x/iADE).
 
 ```
-src/
-  config/        environment (base URL, credentials, timeouts), UI catalog, test tags
-  fixtures/      the base test: read-only guard + ready-built page objects
-  pages/         page objects, one per screen
-    shared/      BasePage, SidebarComponent, TableComponent, GlobalSearchComponent
-  tests/         specs, mirroring pages/ by module
-    auth/        signs in for real, runs without a saved session
-    backlog/     cases awaiting approval; they report but never execute
-  test-plans/    TC-VEC-001..036 as data: steps, expected results, environment
-  setup/         signs in once and saves the session
-  utils/         read-only guard, proof steps, custom assertions, Allure metadata
-reports/         html, allure-results, junit, traces (git-ignored)
-scripts/         one-off exploration scripts used to discover locators
+tests/
+  admin/<page-slug>/<TS-ID>-<page-slug>.spec.ts
+  client-portal/<page-slug>/<TS-ID>-<page-slug>.spec.ts
+  service-provider/<page-slug>/<TS-ID>-<page-slug>.spec.ts
+  fixtures/          login per portal, Allure metadata, read-only guard
 ```
 
-Specs never build a locator. They call page objects, which own the selectors,
-so a UI change is fixed in one file rather than across the suite.
+Example: `tests/admin/clients/ADM-TS-03-clients.spec.ts` holds `VCTR-ADM-018` … `025` in that order.
 
 ## Setup
 
-```bash
-npm install
-npx playwright install chromium
-copy .env.example .env
-```
-
-Fill in `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_OTP` (sign-in asks for a
-6-digit SMS code). The `setup` project signs in once and saves the session to
-`.auth/admin.prod.json`; every other project reuses it.
-
-Prefer not to put the password in `.env`? Sign in by hand instead:
-
-```bash
-npm run auth:login
-```
+Playwright is already installed in this repo. Copy `.env.example` to `.env` and set portal emails/passwords. OTP is `000000` for the test accounts (read from `.env`, never committed).
 
 ## Run
 
 ```bash
-npm test                # everything
-npm run test:headed     # with the browser visible
-npm run test:smoke      # only cases tagged @smoke
-npm run test:admin      # the automated read-only cases
-npm run test:backlog    # list the cases awaiting approval
-npm run list            # what would run, without running it
-npm run typecheck       # compile the framework
+npm test                 # full suite (all three portals)
+npm run test:regression  # only cases tagged @regression (Regr = Yes)
+npx playwright test tests/admin/clients
 ```
-
-Select by tag: `npx playwright test --grep "@compliance"`. Tags are defined in
-`src/config/test-tags.ts` — a suite tag (`@smoke` / `@regression`), a module
-tag, and `@read-only` or `@writes-data`.
-
-## Environments
-
-`TEST_ENV` picks the target, defaulting to `prod`:
-
-| TEST_ENV  | Base URL           | Writes               |
-| --------- | ------------------ | -------------------- |
-| `prod`    | `ADMIN_BASE_URL`   | blocked by the guard |
-| `staging` | `STAGING_BASE_URL` | allowed              |
-
-`staging` has no default URL on purpose: a wrong guess would point the
-data-changing cases at production. The run fails with a clear message until
-`STAGING_BASE_URL` is set.
 
 ## Reports
 
-Every step attaches a screenshot and is titled with its action and expected
-result, so the report reads like the written test case with evidence attached.
+Allure is layered on the existing Playwright reporters (`list`, HTML, JUnit, JSON). Raw Allure results go to `allure-results/`.
 
 ```bash
-npm run report          # Playwright HTML
-npm run allure:generate
-npm run allure:open
+npm run report:generate
+npm run report:open
 ```
 
-## MCP
+`report:generate` copies `allure-report/latest/history` into `allure-results/history` when it exists (trend graphs), writes a permanent report to `allure-report/runs/<UTC-timestamp>-<git-sha>`, and refreshes `allure-report/latest`. Open a specific run with `npx allure open allure-report/runs/<folder>`.
 
-- Playwright MCP is configured in `.cursor/mcp.json`. Reload Cursor MCP after opening this repo.
-- Optional TestDino reporting MCP: copy `.cursor/mcp.testdino.example.json` into `.cursor/mcp.json` and set `TESTDINO_PAT`.
+Each test sets `parentSuite` = portal, `suite` = Test Set, `AS_ID` = VCTR ID, `sequence` = position in the set, severity from P1/P2/P3, `@regression` when Regr is Yes, and a TMS link back to that portal’s Confluence plan.
 
-Knowledge base for scenarios: Settings → Knowledge Base.
+## Data-safety rule
+
+Cases whose **Regr** or **Expected Result** says *requires sandbox*, *mutating*, *do not execute*, or *data-dependent* are `test.fixme()` with the Confluence wording in the skip comment. They are not implemented as a mutating click or submit. Production stays observe/navigate/assert only: no Save, Confirm, Archive, Delete, Restore, Generate, or form submit (login excepted). A request guard blocks mutating HTTP except auth and read-over-POST RPCs.
+
+Admin **Accounting** (payout/invoice generation) is out of this pass per the hub page.

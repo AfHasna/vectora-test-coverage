@@ -13,14 +13,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "@config/*": ["src/config/*"],
-      "@fixtures/*": ["src/fixtures/*"],
-      "@pages/*": ["src/pages/*"],
-      "@utils/*": ["src/utils/*"],
-      "@test-plans/*": ["src/test-plans/*"]
-    }
+    "baseUrl": "."
   },
-  "include": ["src/**/*.ts", "playwright.config.ts"]
+  "include": ["tests/**/*.ts", "playwright.config.ts"]
 }
