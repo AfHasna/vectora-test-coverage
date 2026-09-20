@@ -66,13 +66,22 @@ async function applyPreconditions(page: Page, meta: RunnableCase): Promise<void>
   }
 
   if (/logged in/i.test(pre)) {
-    await login(page, portal);
-    await expectLoggedIn(page);
+    await page.goto('/');
+    try {
+      await expectLoggedIn(page, portal);
+    } catch {
+      await login(page, portal);
+      await expectLoggedIn(page, portal);
+    }
+    const route = pathFromText(pre);
+    if (route?.startsWith('/')) {
+      await page.goto(route);
+    }
     return;
   }
 
   if (/at otp screen/i.test(pre)) {
-    await login(page, portal);
+    await login(page, portal, { stopAtOtp: true });
     return;
   }
 
@@ -133,12 +142,12 @@ async function performStep(page: Page, step: string, meta: RunnableCase): Promis
   }
 
   if (/sign out|log out/i.test(text)) {
-    await signOut(page);
+    await signOut(page, portal);
     return;
   }
 
-  if (/admin\.govectora\.com/i.test(text)) {
-    await page.goto('https://admin.govectora.com/');
+  if (/admin\.govectora\.com|go to admin/i.test(text)) {
+    await page.goto(portal.baseURL.replace(/\/$/, '') + '/');
     return;
   }
 
@@ -162,17 +171,17 @@ async function performStep(page: Page, step: string, meta: RunnableCase): Promis
   await expect(page.locator('body')).toBeVisible();
 }
 
-async function assertExpected(page: Page, expected: string): Promise<void> {
+async function assertExpected(page: Page, meta: RunnableCase): Promise<void> {
   await expect(page.locator('body')).toBeVisible();
 
-  if (/inline error|error shown|access denied/i.test(expected)) {
+  if (/inline error|error shown|access denied/i.test(meta.expected)) {
     await expect(page.getByText(/invalid|incorrect|denied|error|wrong/i).first()).toBeVisible({
       timeout: 15_000,
     });
   }
 
-  if (/dashboard loads/i.test(expected)) {
-    await expectLoggedIn(page);
+  if (/dashboard loads/i.test(meta.expected)) {
+    await expectLoggedIn(page, optionalPortalConfig(meta.portalKey));
   }
 }
 
@@ -195,6 +204,6 @@ export async function runCase(page: Page, meta: RunnableCase): Promise<void> {
   }
 
   await test.step(`Expected: ${meta.expected}`, async () => {
-    await assertExpected(page, meta.expected);
+    await assertExpected(page, meta);
   });
 }

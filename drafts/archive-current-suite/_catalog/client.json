@@ -1,0 +1,446 @@
+[
+  {
+    "id": "CP-TS-01",
+    "title": "Authentication & Session",
+    "cases": [
+      {
+        "id": "VCTR-CP-001",
+        "title": "Valid login + OTP succeeds",
+        "preconditions": "Logged out",
+        "actionSteps": "1) Go to portal.govectora.com 2) Enter valid email/password 3) Submit 4) Enter 6-digit OTP 5) Submit",
+        "expected": "Dashboard loads; sidebar shows the full nav list",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-002",
+        "title": "Invalid password rejected",
+        "preconditions": "Logged out",
+        "actionSteps": "1) Enter valid email + wrong password 2) Submit",
+        "expected": "Inline error; no OTP step reached",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-003",
+        "title": "Invalid OTP rejected",
+        "preconditions": "At OTP screen",
+        "actionSteps": "1) Enter wrong 6-digit code 2) Submit",
+        "expected": "Error shown; access denied",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-004",
+        "title": "Session sign-out",
+        "preconditions": "Logged in",
+        "actionSteps": "1) Open user menu 2) Sign out",
+        "expected": "Returns to login screen; protected routes unreachable",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-005",
+        "title": "Portal user blocked from Admin panel",
+        "preconditions": "Logged in as client-test",
+        "actionSteps": "1) Attempt to open admin.govectora.com in the same session/browser profile",
+        "expected": "Portal credentials do not grant Admin access (separate auth realm)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-006",
+        "title": "First-run onboarding tour",
+        "preconditions": "Fresh login",
+        "actionSteps": "1) Observe \"Skip\"/\"Next\" tour prompt",
+        "expected": "Tour dismissible via Skip; does not block navigation",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-02",
+    "title": "Dashboard",
+    "cases": [
+      {
+        "id": "VCTR-CP-007",
+        "title": "Today-at-a-glance cards render",
+        "preconditions": "Dashboard",
+        "actionSteps": "1) Observe Active Passengers, Today's Trips, In Progress, Completed Today, Open Incidents cards",
+        "expected": "Counts render and match underlying data (e.g. Active Passengers = 2 in test tenant)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-008",
+        "title": "Trip Status Mix chart (last 30 days)",
+        "preconditions": "Dashboard",
+        "actionSteps": "1) Observe chart",
+        "expected": "Bars/legend for Scheduled/Dispatched/Accepted/In Progress/Completed/Cancelled/Not Completed render without error",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-009",
+        "title": "No-shows counter excluded from trip counts",
+        "preconditions": "Dashboard",
+        "actionSteps": "1) Compare \"No-shows (passengers)\" tile to Trip Status Mix totals",
+        "expected": "No-shows tracked separately, footnoted as \"not counted as trips\"",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-010",
+        "title": "Drivers Compliance summary tile",
+        "preconditions": "Dashboard",
+        "actionSteps": "1) Observe Compliant/Expiring/Non-Compliant counts",
+        "expected": "Matches Driver Compliance page totals",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-011",
+        "title": "Today's Trip Feed empty/populated state",
+        "preconditions": "Dashboard",
+        "actionSteps": "1) Observe feed",
+        "expected": "Shows \"No trips scheduled for today\" when empty, or a list when populated",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-03",
+    "title": "Passengers",
+    "cases": [
+      {
+        "id": "VCTR-CP-012",
+        "title": "Passengers list scoped to tenant",
+        "preconditions": "`/passengers`",
+        "actionSteps": "1) Open list",
+        "expected": "Only this client's passengers appear (2 in test tenant); Name/Status columns present",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-013",
+        "title": "Add Passenger form (observe only, do not submit)",
+        "preconditions": "`/passengers` → Add Passenger",
+        "actionSteps": "1) Open Add Passenger 2) Inspect required fields",
+        "expected": "Form opens with the same field groupings as Admin's passenger form scoped to this client; do not save",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-014",
+        "title": "\"My Requests\" tab",
+        "preconditions": "Passengers page",
+        "actionSteps": "1) Open \"My Requests\" sub-tab",
+        "expected": "Shows client-submitted request history/status (Passenger Request type from Admin's Request SLA config)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-015",
+        "title": "Export controls",
+        "preconditions": "Passengers list",
+        "actionSteps": "1) Trigger Excel/PDF/Print",
+        "expected": "Export completes without error",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-016",
+        "title": "Column visibility toggle",
+        "preconditions": "Passengers list",
+        "actionSteps": "1) Open Columns control 2) Toggle a column",
+        "expected": "Column show/hide persists during session",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-04",
+    "title": "Route Sheets & Trips",
+    "cases": [
+      {
+        "id": "VCTR-CP-017",
+        "title": "Route Sheets list scoped & paired RSO/RSR",
+        "preconditions": "`/trips/route-sheets`",
+        "actionSteps": "1) Open list",
+        "expected": "Shows only this client's route sheets; Outbound/Return pairs share numeric suffix (e.g. RSO-0003/RSR-0003)",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-018",
+        "title": "Active Trips tab",
+        "preconditions": "Route Sheets → Active Trips",
+        "actionSteps": "1) Open tab",
+        "expected": "Shows today's trips for this client only, if any",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-019",
+        "title": "Future Trips are read-only",
+        "preconditions": "Route Sheets → Future Trips",
+        "actionSteps": "1) Open tab 2) Inspect available row actions",
+        "expected": "No dispatch/status-change action available — consistent with today-only dispatch rule",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-020",
+        "title": "Trips History read-only",
+        "preconditions": "Route Sheets → Trips History",
+        "actionSteps": "1) Open tab",
+        "expected": "Past trips listed; no mutating actions available",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-021",
+        "title": "On Demand Trips tab",
+        "preconditions": "Route Sheets → On Demand Trips",
+        "actionSteps": "1) Open tab",
+        "expected": "Renders without error (empty or populated)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-022",
+        "title": "Active Days chip display",
+        "preconditions": "Route Sheets list",
+        "actionSteps": "1) Inspect Active Days column on a row",
+        "expected": "7-day chip strip (M–S) highlights the correct scheduled days",
+        "pri": "P2",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-05",
+    "title": "Incidents",
+    "cases": [
+      {
+        "id": "VCTR-CP-023",
+        "title": "Incidents list scoped & read-only",
+        "preconditions": "`/incidents`",
+        "actionSteps": "1) Open list",
+        "expected": "Only this client's incidents shown (0 in test tenant → \"No incidents have been reported\"); no create/edit actions",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-024",
+        "title": "Incident detail linkage (data-dependent)",
+        "preconditions": "An incident exists",
+        "actionSteps": "1) Open an incident row",
+        "expected": "Links back to the source trip/passenger event (No Show / Early Cancel / Late Cancel)",
+        "pri": "P2",
+        "regr": "No — data-dependent, currently empty in test tenant"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-06",
+    "title": "Compliance",
+    "cases": [
+      {
+        "id": "VCTR-CP-025",
+        "title": "Driver Compliance tab scoped",
+        "preconditions": "`/compliance/driver-compliance`",
+        "actionSteps": "1) Open tab",
+        "expected": "Only drivers assigned to this client's routes shown; Expiring/Expired summary tiles at top",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-026",
+        "title": "Compliance thresholds match Admin config",
+        "preconditions": "Driver Compliance list",
+        "actionSteps": "1) Compare \"Expiring within 30 days\" tile logic to Admin Settings Compliance Thresholds",
+        "expected": "Same 30-day/7-day windows apply",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-027",
+        "title": "Monitor Compliance sub-tab",
+        "preconditions": "Compliance → Monitor Compliance",
+        "actionSteps": "1) Open sub-tab",
+        "expected": "Renders monitor compliance rows scoped to this client",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-028",
+        "title": "Export controls",
+        "preconditions": "Compliance list",
+        "actionSteps": "1) Trigger Excel/PDF/Print",
+        "expected": "Completes without error",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-07",
+    "title": "Invoices",
+    "cases": [
+      {
+        "id": "VCTR-CP-029",
+        "title": "Invoices list scoped, empty state",
+        "preconditions": "`/invoices`",
+        "actionSteps": "1) Open list",
+        "expected": "Only this client's invoices shown (0 in test tenant → \"No invoices found for your organization\")",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-030",
+        "title": "Invoice status values (data-dependent)",
+        "preconditions": "An invoice exists",
+        "actionSteps": "1) Open an invoice",
+        "expected": "Status is one of Draft/Sent/Paid/Overdue",
+        "pri": "P2",
+        "regr": "No — data-dependent, currently empty in test tenant"
+      },
+      {
+        "id": "VCTR-CP-031",
+        "title": "No payment-initiation controls present",
+        "preconditions": "Invoices page",
+        "actionSteps": "1) Inspect available actions",
+        "expected": "Portal is view/download only — no \"Pay Now\" or payment-method entry point",
+        "pri": "P1",
+        "regr": "Yes"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-08",
+    "title": "Budget & Economics",
+    "cases": [
+      {
+        "id": "VCTR-CP-032",
+        "title": "Empty state without a contract",
+        "preconditions": "`/budget-economics`, no contract on file",
+        "actionSteps": "1) Open page",
+        "expected": "Shows \"No contracts on file yet. Budget tracking will appear once a contract is set up.\"",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-033",
+        "title": "Populated view (data-dependent)",
+        "preconditions": "A client with a contract on file",
+        "actionSteps": "1) Open page",
+        "expected": "Budget tracking widgets render using Admin-configured Economics Cost Defaults",
+        "pri": "P3",
+        "regr": "No — data-dependent, no contracted client currently available in test tenant"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-09",
+    "title": "Reports",
+    "cases": [
+      {
+        "id": "VCTR-CP-034",
+        "title": "Spend Report sub-tabs render",
+        "preconditions": "`/reports/spend`",
+        "actionSteps": "1) Open Spend, Trips, Passengers, Incidents, Compliance sub-tabs in turn",
+        "expected": "Each renders without error, scoped to this client",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-035",
+        "title": "Report Filters control",
+        "preconditions": "Any report sub-tab",
+        "actionSteps": "1) Open Filters",
+        "expected": "Filter panel opens; applying/resetting works",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-10",
+    "title": "Messaging & Notifications",
+    "cases": [
+      {
+        "id": "VCTR-CP-036",
+        "title": "Messaging entry point",
+        "preconditions": "Header",
+        "actionSteps": "1) Open Messages icon",
+        "expected": "Message center opens (scoped to this client's conversations)",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-037",
+        "title": "Notifications scoped & unread state",
+        "preconditions": "Header",
+        "actionSteps": "1) Open Notifications",
+        "expected": "Only this client's/user's notifications shown",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-038",
+        "title": "Dark/light mode toggle",
+        "preconditions": "Any page",
+        "actionSteps": "1) Toggle theme",
+        "expected": "Switches instantly; persists",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  },
+  {
+    "id": "CP-TS-11",
+    "title": "Cross-cutting: Tenant Scoping & Safety",
+    "cases": [
+      {
+        "id": "VCTR-CP-039",
+        "title": "No cross-client data leakage",
+        "preconditions": "Any list module",
+        "actionSteps": "1) Inspect all rows across Passengers, Route Sheets, Incidents, Compliance, Invoices",
+        "expected": "Every row belongs to this portal user's own `client_id` — none from other clients",
+        "pri": "P1",
+        "regr": "Yes"
+      },
+      {
+        "id": "VCTR-CP-040",
+        "title": "Pagination defaults consistent with Admin",
+        "preconditions": "Any list with >10 rows (data-dependent)",
+        "actionSteps": "1) Observe default page size",
+        "expected": "10 per page, matching Admin convention",
+        "pri": "P3",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-041",
+        "title": "Global Search scope (if present)",
+        "preconditions": "Header search icon",
+        "actionSteps": "1) Open search 2) Query a passenger name",
+        "expected": "Results limited to this client's own data",
+        "pri": "P2",
+        "regr": "No"
+      },
+      {
+        "id": "VCTR-CP-042",
+        "title": "Help link",
+        "preconditions": "Sidebar",
+        "actionSteps": "1) Open Help",
+        "expected": "Contextual help content loads without error",
+        "pri": "P3",
+        "regr": "No"
+      }
+    ]
+  }
+]

@@ -3,7 +3,7 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-export type PortalKey = 'admin' | 'client' | 'provider';
+export type PortalKey = 'admin' | 'client' | 'provider' | 'driver' | 'guardian';
 
 export interface PortalCredentials {
   email: string;
@@ -78,15 +78,43 @@ export function optionalPortalConfig(key: PortalKey): PortalConfig {
     };
   }
 
-  const creds = pair('SP_EMAIL', 'SP_PASSWORD');
+  if (key === 'provider') {
+    const creds = pair('SP_EMAIL', 'SP_PASSWORD');
+    return {
+      key,
+      name: 'Service Provider Portal',
+      baseURL: envUrl('PROVIDER_BASE_URL', 'https://provider.govectora.com'),
+      credentials: {
+        email: creds?.email ?? '',
+        password: creds?.password ?? '',
+        otp: otp('SP_OTP'),
+      },
+    };
+  }
+
+  if (key === 'driver') {
+    const creds = pair('DRIVER_EMAIL', 'DRIVER_PASSWORD');
+    return {
+      key,
+      name: 'Driver App',
+      baseURL: envUrl('DRIVER_BASE_URL', 'http://localhost:8082'),
+      credentials: {
+        email: creds?.email ?? '',
+        password: creds?.password ?? '',
+        otp: otp('DRIVER_OTP'),
+      },
+    };
+  }
+
+  const creds = pair('GUARDIAN_EMAIL', 'GUARDIAN_PASSWORD');
   return {
     key,
-    name: 'Service Provider Portal',
-    baseURL: envUrl('PROVIDER_BASE_URL', 'https://provider.govectora.com'),
+    name: 'Guardian App',
+    baseURL: envUrl('GUARDIAN_BASE_URL', 'http://localhost:8081'),
     credentials: {
       email: creds?.email ?? '',
       password: creds?.password ?? '',
-      otp: otp('SP_OTP'),
+      otp: otp('GUARDIAN_OTP'),
     },
   };
 }
@@ -105,4 +133,12 @@ export const PORTAL_FROM_PROJECT: Record<string, PortalKey> = {
   provider: 'provider',
   'provider-auth': 'provider',
   'provider-setup': 'provider',
+  driver: 'driver',
+  'driver-auth': 'driver',
+  'driver-setup': 'driver',
+  guardian: 'guardian',
+  'guardian-auth': 'guardian',
+  'guardian-setup': 'guardian',
+  journey: 'admin',
+  'journey-admin': 'admin',
 };

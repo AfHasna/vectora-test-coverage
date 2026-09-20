@@ -8,7 +8,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['tests/**/*.ts', 'playwright.config.ts'],
+    files: ['tests/**/*.ts', 'playwright.config.ts', 'playwright.archive.config.ts', 'drafts/archive-current-suite/**/*.ts'],
     languageOptions: {
       parserOptions: { project: './tsconfig.json', tsconfigRootDir: import.meta.dirname },
     },
@@ -18,7 +18,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/**/*.spec.ts'],
+    files: ['tests/**/*.spec.ts', 'drafts/archive-current-suite/**/*.spec.ts'],
     ...playwright.configs['flat/recommended'],
     rules: {
       ...playwright.configs['flat/recommended'].rules,

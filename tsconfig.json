@@ -15,5 +15,5 @@
     "noEmit": true,
     "baseUrl": "."
   },
-  "include": ["tests/**/*.ts", "playwright.config.ts"]
+  "include": ["tests/**/*.ts", "playwright.config.ts", "playwright.archive.config.ts", "drafts/archive-current-suite/**/*.ts"]
 }

@@ -5,6 +5,8 @@ const isCI = !!process.env.CI;
 const admin = optionalPortalConfig('admin');
 const client = optionalPortalConfig('client');
 const provider = optionalPortalConfig('provider');
+const driver = optionalPortalConfig('driver');
+const guardian = optionalPortalConfig('guardian');
 
 export default defineConfig({
   testDir: './tests',
@@ -26,10 +28,13 @@ export default defineConfig({
         resultsDir: 'allure-results',
         detail: false,
         environmentInfo: {
-          Suite: 'Vectora regression (Admin / Client / Service Provider)',
+          Suite: 'Vectora regression (Admin / Client / SP / Driver / Guardian)',
           'Admin URL': admin.baseURL,
           'Client URL': client.baseURL,
           'Provider URL': provider.baseURL,
+          'Driver URL': driver.baseURL,
+          'Guardian URL': guardian.baseURL,
+          TEST_ENV: process.env.TEST_ENV ?? 'unset',
         },
       },
     ],
@@ -46,6 +51,7 @@ export default defineConfig({
     {
       name: 'admin-setup',
       testMatch: /fixtures\/admin\.setup\.ts/,
+      timeout: 180_000,
       use: { ...devices['Desktop Chrome'], baseURL: admin.baseURL, trace: 'off', screenshot: 'off', video: 'off' },
     },
     {
@@ -59,8 +65,18 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], baseURL: provider.baseURL, trace: 'off', screenshot: 'off', video: 'off' },
     },
     {
+      name: 'driver-setup',
+      testMatch: /fixtures\/driver\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 }, baseURL: driver.baseURL, trace: 'off', screenshot: 'off', video: 'off' },
+    },
+    {
+      name: 'guardian-setup',
+      testMatch: /fixtures\/guardian\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 }, baseURL: guardian.baseURL, trace: 'off', screenshot: 'off', video: 'off' },
+    },
+    {
       name: 'admin-auth',
-      testMatch: /admin\/authentication\/.*\.spec\.ts/,
+      testMatch: /regression\/admin\/authentication\/.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: admin.baseURL,
@@ -72,7 +88,7 @@ export default defineConfig({
     },
     {
       name: 'client-auth',
-      testMatch: /client-portal\/authentication\/.*\.spec\.ts/,
+      testMatch: /regression\/client\/authentication\/.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: client.baseURL,
@@ -84,7 +100,7 @@ export default defineConfig({
     },
     {
       name: 'provider-auth',
-      testMatch: /service-provider\/authentication\/.*\.spec\.ts/,
+      testMatch: /regression\/service-provider\/authentication\/.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: provider.baseURL,
@@ -95,9 +111,29 @@ export default defineConfig({
       },
     },
     {
+      name: 'driver-auth',
+      testMatch: /regression\/driver-app\/authentication\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        baseURL: driver.baseURL,
+        storageState: { cookies: [], origins: [] },
+      },
+    },
+    {
+      name: 'guardian-auth',
+      testMatch: /regression\/guardian-app\/authentication\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        baseURL: guardian.baseURL,
+        storageState: { cookies: [], origins: [] },
+      },
+    },
+    {
       name: 'admin',
-      testMatch: /admin\/.*\.spec\.ts/,
-      testIgnore: [/admin\/authentication\//],
+      testMatch: /regression\/admin\/.*\.spec\.ts/,
+      testIgnore: [/regression\/admin\/authentication\//],
       dependencies: ['admin-setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -107,8 +143,8 @@ export default defineConfig({
     },
     {
       name: 'client',
-      testMatch: /client-portal\/.*\.spec\.ts/,
-      testIgnore: [/client-portal\/authentication\//],
+      testMatch: /regression\/client\/.*\.spec\.ts/,
+      testIgnore: [/regression\/client\/authentication\//],
       dependencies: ['client-setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -118,13 +154,57 @@ export default defineConfig({
     },
     {
       name: 'provider',
-      testMatch: /service-provider\/.*\.spec\.ts/,
-      testIgnore: [/service-provider\/authentication\//],
+      testMatch: /regression\/service-provider\/.*\.spec\.ts/,
+      testIgnore: [/regression\/service-provider\/authentication\//],
       dependencies: ['provider-setup'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: provider.baseURL,
         storageState: storageStatePath('provider'),
+      },
+    },
+    {
+      name: 'driver',
+      testMatch: /regression\/driver-app\/.*\.spec\.ts/,
+      testIgnore: [/regression\/driver-app\/authentication\//],
+      fullyParallel: false,
+      workers: 1,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        baseURL: driver.baseURL,
+      },
+    },
+    {
+      name: 'guardian',
+      testMatch: /regression\/guardian-app\/.*\.spec\.ts/,
+      testIgnore: [/regression\/guardian-app\/authentication\//],
+      fullyParallel: false,
+      workers: 1,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        baseURL: guardian.baseURL,
+      },
+    },
+    {
+      name: 'journey-admin',
+      testMatch: /regression\/connected-flow\/REG-CONN-loop-journey\.spec\.ts/,
+      dependencies: ['admin-setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: admin.baseURL,
+        storageState: storageStatePath('admin'),
+      },
+    },
+    {
+      name: 'journey',
+      testMatch: /regression\/connected-flow\/REG-CONN-apps\.spec\.ts/,
+      fullyParallel: false,
+      workers: 1,
+      timeout: 180_000,
+      use: {
+        ...devices['Desktop Chrome'],
       },
     },
   ],

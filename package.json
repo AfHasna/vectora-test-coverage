@@ -1,11 +1,12 @@
 {
   "name": "vectora-automation",
   "version": "1.0.0",
-  "description": "Playwright + TypeScript regression suite for the Vectora Admin, Client, and Service Provider portals",
+  "description": "Playwright + TypeScript regression suite for Vectora Admin, Client, Service Provider, Driver, and Guardian apps",
   "license": "ISC",
   "scripts": {
     "test": "node scripts/clean-allure-results.mjs && playwright test",
-    "test:regression": "npx playwright test --grep @regression",
+    "test:regression": "npx playwright test tests/regression --grep @regression",
+    "test:archive": "npx playwright test --config=playwright.archive.config.ts",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "list": "playwright test --list",
@@ -15,7 +16,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "report:generate": "node scripts/report-generate.mjs",
-    "report:open": "npx allure open --port 8081 allure-report/latest",
+    "report:open": "npx allure open --port 8083 allure-report/latest",
     "report:show": "playwright show-report reports/html",
     "prepare": "husky"
   },
