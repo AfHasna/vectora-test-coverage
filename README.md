@@ -4,6 +4,8 @@ Playwright + Allure for Vectora **Admin**, **Client**, **Service Provider**, **D
 
 The live suite is `tests/regression/` (`REG-*` IDs). The previous VCTR suite is archived under `drafts/archive-current-suite/` — see `drafts/regression-inventory.md` and `docs/NEW-REGRESSION-SUITE-STRUCTURE.md`.
 
+**Team briefing (what was accomplished):** [`docs/TEAM-STATUS.md`](docs/TEAM-STATUS.md).
+
 ## Layout
 
 ```
